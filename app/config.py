@@ -24,7 +24,7 @@ class Settings(BaseSettings):
     LOG_FORMAT: str = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
     
     # RabbitMQ Settings
-    RABBITMQ_URL: str = os.getenv("RABBITMQ_URL", "amqp://guest:guest@localhost:5672/")
+    RABBITMQ_URL: str = os.getenv("RABBITMQ_URL", "amqps://lcfdoyzq:JzI_hJfY2s-59qgC4OvE4Eo4fKQ0qsQX@fuji.lmq.cloudamqp.com/")
     RABBITMQ_EXCHANGE: str = "data_collected"
     RABBITMQ_QUEUE: str = "data_collected"
     RABBITMQ_ROUTING_KEY: str = "data.collected"

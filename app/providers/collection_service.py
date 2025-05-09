@@ -196,25 +196,25 @@ class CollectionService:
                     "source": "file_upload",
                     "filename": file.filename,
                     "content_type": file.content_type,
-                    **config
-                }
+                **config
+            }
             )
                 
                 # Save to database
             collection_id = await self.repository.insert(collection)
             message_data["collection_id"] = collection_id
-                
+
             # Publish to message broker
             logger.info(f"Publishing file data to message broker, collection_id: {collection_id}")
             await self.message_broker.publish_data_collected(message_data)
             logger.info("File data published successfully")
-                
+
             return {
-                    "status": "success",
-                    "message": "File processed and published successfully",
+                "status": "success",
+                "message": "File processed and published successfully",
                     "collection_id": collection_id
-                }
-                    
+            }
+
         except Exception as e:
             logger.error(f"Error processing file: {str(e)}", exc_info=True)
             raise
