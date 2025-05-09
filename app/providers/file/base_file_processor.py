@@ -1,6 +1,7 @@
 from abc import abstractmethod
 from typing import BinaryIO, Dict, Any
 from app.providers.base_content_processor import BaseContentProcessor
+import io
 
 class FileContentProcessor(BaseContentProcessor):
     """Base class for all file content processors"""
@@ -16,9 +17,18 @@ class FileContentProcessor(BaseContentProcessor):
     def validate_file(self, file: BinaryIO) -> None:
         """Common validation for all file types"""
         # Check if file is empty
-        file.seek(0, 2)  # Go to end of file
-        size = file.tell()  # Get position (size)
-        file.seek(0)  # Reset position to beginning
+        if isinstance(file, io.BytesIO):
+            size = len(file.getvalue())
+        elif hasattr(file, 'file'):
+            # For FastAPI UploadFile objects
+            file.file.seek(0, 2)  # Go to end of file
+            size = file.file.tell()  # Get position (size)
+            file.file.seek(0)  # Reset position to beginning
+        else:
+            # For regular files
+            file.seek(0, 2)  # Go to end of file
+            size = file.tell()  # Get position (size)
+            file.seek(0)  # Reset position to beginning
         
         if size == 0:
             raise ValueError("File is empty")

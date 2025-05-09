@@ -8,7 +8,16 @@ class DOCXProcessor(FileContentProcessor):
     
     def process_file(self, file: BinaryIO) -> Dict[str, Any]:
         """Extract text from DOCX file"""
-        doc = Document(file)
+        # Handle FastAPI UploadFile objects
+        if hasattr(file, 'file'):
+            file_obj = file.file
+            # Store filename for later use
+            filename = getattr(file, 'filename', 'unknown.docx')
+        else:
+            file_obj = file
+            filename = getattr(file, 'filename', 'unknown.docx')
+            
+        doc = Document(file_obj)
         
         # Extract text from paragraphs
         paragraphs = [paragraph.text for paragraph in doc.paragraphs]
@@ -35,9 +44,7 @@ class DOCXProcessor(FileContentProcessor):
                 "last_modified_by": props.last_modified_by or ""
             }
         
-        # Extract scientific topics
-        scientific_topics = extract_topics(text)
-        
+
         return {
             "content": text,
             "metadata": {
@@ -45,7 +52,6 @@ class DOCXProcessor(FileContentProcessor):
                 "source": "file_upload",
                 "file_type": "docx",
                 "extraction_method": "python-docx",
-                "scientific_topics": scientific_topics,
-                "filename": getattr(file, 'filename', 'unknown.docx')
+                "filename": filename
             }
         }

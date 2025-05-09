@@ -8,15 +8,23 @@ class TXTProcessor(FileContentProcessor):
     def process_file(self, file: BinaryIO) -> Dict[str, Any]:
         """Extract text from TXT file"""
         try:
+            # Handle FastAPI UploadFile objects
+            if hasattr(file, 'file'):
+                file_obj = file.file
+                # Store filename for later use
+                filename = getattr(file, 'filename', 'unknown.txt')
+            else:
+                file_obj = file
+                filename = getattr(file, 'filename', 'unknown.txt')
+                
             # Try UTF-8 encoding first
-            text = file.read().decode('utf-8')
+            file_obj.seek(0)
+            text = file_obj.read().decode('utf-8')
         except UnicodeDecodeError:
             # If UTF-8 fails, try Latin-1 (should always work)
-            file.seek(0)
-            text = file.read().decode('latin-1')
+            file_obj.seek(0)
+            text = file_obj.read().decode('latin-1')
         
-        # Extract scientific topics
-        scientific_topics = extract_topics(text)
         
         return {
             "content": text,
@@ -24,7 +32,6 @@ class TXTProcessor(FileContentProcessor):
                 "source": "file_upload",
                 "file_type": "txt",
                 "extraction_method": "plain-text",
-                "scientific_topics": scientific_topics,
-                "filename": getattr(file, 'filename', 'unknown.txt')
+                "filename": filename
             }
         }
